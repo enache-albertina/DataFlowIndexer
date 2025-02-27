@@ -1,0 +1,82 @@
+APD - Calculul paralel al unui index inversat folosind paradigma Map-Reduce
+Tema #1a
+
+Prezentare generala
+
+Aplicatia implementata in C++ este una de procesare a cuvintelor, fiind una de
+multhithreaded performanta, conceputa pentru a procesa volume mari de fisiere 
+text, lucrand cu acestea in mod eficient. Se utilizeaza paradigma Map-Reduce
+pentru a analiza mai multe fisiere concurente si a extrage cuvintele unice din
+acestea. Ele sunt distrubuite catre reduceri pe baza literei initiale. Datele 
+sunt scrise apoi in fisier de iesire, in ordine alfabetica.
+
+Caracteristicile codului
+
+* Procesare Multithreaded: Folosesc mai multe threaduri de mapper pentru a 
+gestiona procesarea fisierelor simultan, astfel se reduce intr-un mod semnificativ
+timpul de executie a sistemului multi-code.
+
+* Structuri de Date Thread-Safe: Foloseste mutex-uri si variabile atomice pantru
+a asigura accesul la resursele partajate in mod sigur.
+
+* Gestionare eficienta a Threadurilor: Am implementat un pool de threaduri pentru
+a gestiona threadurile de mapper, astfel incat sa nu fie nevoie sa se creeze si
+sa se distruga threaduri in mod repetat, se minimizeaza supraincarcarea.
+
+* Organizarea datelor: Datele sunt organizate in structuri de date eficiente,
+std::unordered_map si std::unordered_set, pentru a asigura, pentru operatii 
+rapide de cautare si inserare.
+
+* Atribuirea reducerilor: Reducerii sunt atribuite cuvintele in functie de
+litera initiala a cuvantului, astfel se asigura ca reducerii nu vor lucra cu
+aceleasi date in acelasi timp.
+
+* Gestionarea erorilor: Se verifica erorile de deschidere a fisierelor si se
+gestioneaza in mod corespunzator, pentru a asigura ca aplicatia nu se va bloca.
+
+Logica de implementare a algoritmului
+
+1. Analiza argumentelor de linie de comanda: Se verifica daca argumentele sunt
+corecte si se extrage numarul de threaduri de mapper si numarul de reduceri.
+
+2. Gestionarea cozii de fisiere de procesat: Se citesc fisierele de intrare si
+se adauga in coada de fisiere de procesat.
+
+3. Faza de Mapping: 
+  * fiecare thread de mapper extrage un fisier din coada de fisiere de procesat
+  si normalizeaza cuvintele, eliminand caracterele speciale si transformandu-le
+  in litere mici.
+  * distributia cuvintelor : se actualizeaza structura de date a reducerilor
+  cu cuvintele extrase, in functie de litera initiala a cuvantului.
+
+4. Faza de Reducere:
+  * literele din alfabet sunt distribuite catre reduceri, fiecare cuvant este
+  atribuit reducerului corespunzator. Literele suplimentare sunt atribuite
+  reducerilor initiali.
+
+5.  Gestionarea Threadurilor: Se asteapta ca toate threadurile de mapper sa
+termine de procesat fisierele si se asteapta ca toate threadurile de reducer
+sa termine de procesat cuvintele.
+
+6. Scrierea rezultatelor in fisierul de iesire: Se scriu cuvintele in fisierul
+de iesire, in ordine alfabetica.
+
+Optimizari 
+
+* Pool de threaduri: Am implementat un pool de threaduri pentru a gestiona
+threadurile de mapper, astfel incat sa nu fie nevoie sa se creeze si sa se
+distruga threaduri in mod repetat, se minimizeaza supraincarcarea.
+
+*Sortare eficienta: Am folosit un std::map pentru a sorta cuvintele in ordine
+alfabetica, in loc sa folosesc un std::set, pentru a reduce timpul de sortare.
+
+*Limitare sortarii la subsetul de cuvinte: Reducer-ii sorteaza doar cuvintele
+atribuite lor, minimizand operatiile de sortare.
+
+*Gestionarea eficienta a erorilor: Mecanisme de tratare a exceptiilor pentru
+a gestiona erorile de deschidere a fisierelor si a asigura ca aplicatia nu se
+va bloca. 
+
+* Sectiunile critice sunt pastrate cat mai scurte posibil, reducand timpul de
+asteptare al threadurilor pentru a obtine lock-uri si imbunatatind paralelismul
+si rata de transfer.
